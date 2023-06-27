@@ -43,8 +43,19 @@ def tor():
     data = []
     for row in rows:
         cols = row.find_all('td')
-        # Find the 'a' tag within the 'td' tag and extract the 'href' attribute
-        download_link = [col.find('a')['href'] if col.find('a') else '' for col in cols]
+        # Find the 'button' tag with class 'ui blue basic button' within the 'td' tag and extract the 'onclick' attribute
+        download_button = [col.find('button', class_='ui blue basic button') for col in cols]
+        download_link = []
+        for button in download_button:
+            if button:
+                onclick_text = button.get('onclick')
+                # Extract the argument of the submitPage function
+                link = onclick_text.split("'")[1]
+                # Construct the full URL
+                full_link = "https://2torrentz2eu.in/beta2/page.php?url=" + link
+                download_link.append(full_link)
+            else:
+                download_link.append('')
         cols = [col.text.strip() for col in cols]
         cols.append(download_link)
         data.append(cols)
