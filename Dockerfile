@@ -12,8 +12,8 @@ WORKDIR /app
 # Add current directory files to /app in container
 ADD . /app
 
-# Install necessary packages, Flask, BeautifulSoup, requests, ffmpeg-python, and gunicorn
-RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn
+# Install necessary packages, Flask, BeautifulSoup, requests, ffmpeg-python, gunicorn, and parse-torrent-title
+RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn parse-torrent-title
 
 # Make port 5000 available to the world outside this container
 # EXPOSE 5000
