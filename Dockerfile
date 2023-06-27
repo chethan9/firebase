@@ -12,8 +12,11 @@ WORKDIR /app
 # Add current directory files to /app in container
 ADD . /app
 
-# Install necessary packages, Flask and ffmpeg-python
-RUN pip install --no-cache-dir flask werkzeug ffmpeg-python requests gunicorn
+# Install necessary packages, Flask, BeautifulSoup, and ffmpeg-python
+RUN pip install --no-cache-dir flask werkzeug ffmpeg-python requests gunicorn beautifulsoup4
+
+# Add import command for necessary libraries
+RUN sed -i "s/^import ffmpeg$/from ffmpeg import ffmpeg/g" app.py
 
 # Make port 5000 available to the world outside this container
 # EXPOSE 5000
