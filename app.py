@@ -7,6 +7,7 @@ import requests
 from werkzeug.utils import secure_filename
 import os
 import ffmpeg
+import PTN
 
 
 def create_app():
@@ -78,3 +79,10 @@ def magnet():
             return "Error: The link does not contain 'magnet:?xt='", 404
     else:
         return "Error: Could not find the 'Open Magnet' button", 404
+
+
+@app.route('/parse', methods=['GET'])
+def parse():
+    filename = request.args.get('filename')
+    info = PTN.parse(filename)
+    return jsonify(info)
