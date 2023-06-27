@@ -60,3 +60,21 @@ def tor():
         cols.append(download_link)
         data.append(cols)
     return jsonify(data)
+
+
+@app.route('/magnet', methods=['GET'])
+def magnet():
+    url = request.args.get('url')
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    # Find the 'a' tag with class 'download-button' and id 'magnet'
+    magnet_link_tag = soup.find('a', class_='download-button', id='magnet')
+    if magnet_link_tag:
+        magnet_link = magnet_link_tag.get('href')
+        # Check if the link contains 'magnet:?xt='
+        if 'magnet:?xt=' in magnet_link:
+            return magnet_link
+        else:
+            return "Error: The link does not contain 'magnet:?xt='", 404
+    else:
+        return "Error: Could not find the 'Open Magnet' button", 404
