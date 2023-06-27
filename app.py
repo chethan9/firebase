@@ -1,7 +1,7 @@
 # app.py
 import subprocess
 import uuid
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, abort
 from bs4 import BeautifulSoup
 import requests
 from werkzeug.utils import secure_filename
@@ -21,6 +21,13 @@ def create_app():
 
 
 app = create_app()
+
+
+@app.before_request
+def before_request():
+    api_key = request.headers.get('X-API-KEY')
+    if api_key != os.environ.get('API_KEY'):
+        abort(401)  # Unauthorized
 
 
 @app.route('/', methods=['GET'])
