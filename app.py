@@ -38,13 +38,14 @@ def tor():
     url = "https://2torrentz2eu.in/beta2/search.php?torrent-query=" + name
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
-    # Here you would write the code to parse the soup object and extract the data you need
-    # For example, if the data is in a table, you might do something like this:
     table = soup.find('table')
     rows = table.find_all('tr')
     data = []
     for row in rows:
         cols = row.find_all('td')
+        # Find the 'a' tag within the 'td' tag and extract the 'href' attribute
+        download_link = [col.find('a')['href'] if col.find('a') else '' for col in cols]
         cols = [col.text.strip() for col in cols]
+        cols.append(download_link)
         data.append(cols)
     return jsonify(data)
