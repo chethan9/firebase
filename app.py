@@ -2,6 +2,7 @@
 import subprocess
 import uuid
 from flask import Flask, request, jsonify, send_file
+from bs4 import BeautifulSoup
 import requests
 from werkzeug.utils import secure_filename
 import os
@@ -29,3 +30,21 @@ def homepage():
 @app.route('/hello', methods=['GET'])
 def hello():
     return "Hello"
+
+
+@app.route('/tor', methods=['GET'])
+def tor():
+    name = request.args.get('name')
+    url = "https://2torrentz2eu.in/beta2/search.php?torrent-query=" + name
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    # Here you would write the code to parse the soup object and extract the data you need
+    # For example, if the data is in a table, you might do something like this:
+    table = soup.find('table')
+    rows = table.find_all('tr')
+    data = []
+    for row in rows:
+        cols = row.find_all('td')
+        cols = [col.text.strip() for col in cols]
+        data.append(cols)
+    return jsonify(data)
