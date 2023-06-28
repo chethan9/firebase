@@ -1,25 +1,27 @@
 # Use an official Python runtime as a parent image
-FROM python:3.7-slim
+FROM python:3.8-slim-buster
+
+# FFmpeg installation
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set the working directory in the container to /app
 WORKDIR /app
-
-# Add the current directory contents into theApologies for the abrupt cut-off. Here's the continuation and completion of the Dockerfile:
-
-```Dockerfile
-# Add the current directory contents into the container at /app
-ADD . /app
 
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 ENV API_KEY=c113b60e41eca7474dcc993fb4a8
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Add current directory files to /app in container
+ADD . /app
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+# Install necessary packages, Flask, BeautifulSoup, requests, ffmpeg-python, gunicorn, and parse-torrent-title
+RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn parse-torrent-title
 
-# Run app.py when the container launches
-CMD ["flask", "run", "--host=0.0.0.0", "--port=80"]
+# Make port 5000 available to the world outside this container
+# EXPOSE 5000
+
+# Run app.py (Flask server) when the container launches
+CMD gunicorn --bind 0.0.0.0:$PORT app:app
