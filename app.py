@@ -59,14 +59,13 @@ def tor():
                 link = onclick_text.split("'")[1]
                 full_link = "https://2torrentz2eu.in/beta2/page.php?url=" + link
                 download_link.append(full_link)
-            else:
-                download_link.append('')
+        # Remove empty strings from download_link
+        download_link = [link for link in download_link if link]
         cols = [col.text.strip() for col in cols]
         cols.append(download_link)
-        # Remove rows with empty values
-        if any(cols):
-            data.append(cols)
+        data.append(cols)
     return jsonify(data)
+
 
 
 @app.route('/magnet', methods=['GET'])
