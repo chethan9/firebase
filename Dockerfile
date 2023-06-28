@@ -13,7 +13,7 @@ ADD . /app
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
-ENV API_KEY=c113b60e41eca7474dcc993fb4a8  # Replace with your actual API key
+ENV API_KEY=c113b60e41eca7474dcc993fb4a8
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
