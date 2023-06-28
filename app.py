@@ -62,9 +62,18 @@ def tor():
         # Remove empty strings from download_link
         download_link = [link for link in download_link if link]
         cols = [col.text.strip() for col in cols]
-        cols.append(download_link)
-        data.append(cols)
+        # Create a dictionary for each row
+        row_dict = {
+            "Title": cols[0],
+            "Seeds": cols[1],
+            "Leeches": cols[2],
+            "Size": cols[3],
+            "Date": cols[4],
+            "Download": download_link[0] if download_link else None
+        }
+        data.append(row_dict)
     return jsonify(data)
+
 
 
 
