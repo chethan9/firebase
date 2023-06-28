@@ -51,6 +51,8 @@ def tor():
     data = []
     for row in rows:
         cols = row.find_all('td')
+        if len(cols) < 5:
+            continue  # Skip rows with fewer than 5 td elements
         download_button = [col.find('button', class_='ui blue basic button') for col in cols]
         download_link = []
         for button in download_button:
@@ -73,7 +75,6 @@ def tor():
         }
         data.append(row_dict)
     return jsonify(data)
-
 
 
 
