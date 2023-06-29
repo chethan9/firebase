@@ -12,7 +12,6 @@ WORKDIR /app
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
-ENV API_KEY=c113b60e41eca7474dcc993fb4a8
 
 # Add current directory files to /app in container
 ADD . /app
