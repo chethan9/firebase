@@ -217,21 +217,20 @@ def movie():
                     download_link.append(full_link)
             # Remove empty strings from download_link
             download_link = [link for link in download_link if link]
-            if not download_link:
-                continue  # Skip torrents without a download link
             cols = [col.text.strip() for col in cols]
             title = cols[0]
             parsed_title = PTN.parse(title)  # Parse the title
             # Create a dictionary for each row
             row_dict = {
-                "Title": title,
-                "Parsed Title": parsed_title,
-                "Seeds": seeds,
-                "Leeches": int(cols[2]),
-                "Size": cols[3],
-                "Date": cols[4],
-                "Download": download_link[0]
+                "mTitle": title,
+                "mSeeds": seeds,
+                "mLeeches": int(cols[2]),
+                "mSize": cols[3],
+                "mDate": cols[4],
+                "mDownload": download_link[0]
             }
+            # Merge parsed title into row_dict
+            row_dict.update(parsed_title)
             data.append(row_dict)
         response = make_response(jsonify({"movies": data}), 200)
         response.headers["Content-Type"] = "application/json; charset=utf-8"
