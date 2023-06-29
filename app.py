@@ -96,7 +96,6 @@ def magnet():
 
 @app.route('/parse', methods=['GET'])
 def parse():
-```python
     filename = request.args.get('filename')
     info = PTN.parse(filename)
     return jsonify(info)
