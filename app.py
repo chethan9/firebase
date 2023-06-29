@@ -22,14 +22,6 @@ def create_app():
 
 app = create_app()
 
-
-@app.before_request
-def before_request():
-    api_key = request.headers.get('X-API-KEY')
-    if api_key != os.environ.get('API_KEY'):
-        abort(401)  # Unauthorized
-
-
 @app.route('/', methods=['GET'])
 def homepage():
     return "Homepage"
