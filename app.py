@@ -222,6 +222,8 @@ def movie():
             cols = [col.text.strip() for col in cols]
             title = cols[0]
             parsed_title = PTN.parse(title)  # Parse the title
+            # Keep only the specified fields in the parsed title
+            parsed_title = {key: parsed_title.get(key, '-') for key in ['title', 'year', 'season', 'episode', 'resolution', 'quality', 'codec', 'audio', 'language', 'container', 'hardcoded']}
             # Create a dictionary for each row
             row_dict = {
                 "Title": title,
