@@ -8,7 +8,9 @@ from werkzeug.utils import secure_filename
 import os
 import ffmpeg
 import PTN
+import time
 
+app = Flask(__name__)
 
 def create_app():
     app = Flask(__name__, static_folder='uploads', static_url_path='/uploads')
@@ -226,3 +228,36 @@ def bolt():
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
 
+
+@app.route('/freebird', methods=['POST'])
+def freebird():
+    magnet_link = request.json.get('magnet_link')
+    token = "6G7ZWHULQ7WXTTX6DD4CJKGA3OYY6F7HMXHYVL6JS6KXO3YSZAJQ"  # Replace with your actual token
+
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
+
+    # Step 1: Add Magnet
+    response = requests.post('https://api.real-debrid.com/rest/1.0/torrents/addMagnet', headers=headers, data={'magnet': magnet_link})
+    torrent_id = response.json()['id']
+
+    # Step 2: Select Items to Download
+    requests.post(f'https://api.real-debrid.com/rest/1.0/torrents/selectFiles/{torrent_id}', headers=headers, data={'files': 'all'})
+
+    # Step 3: Fetch Torrent Info and wait for status to change to 'downloaded'
+    while True:
+        response = requests.get(f'https://api.real-debrid.com/rest/1.0/torrents/info/{torrent_id}', headers=headers)
+        status = response.json()['status']
+        if status == 'downloaded':
+            break
+        time.sleep(5)  # Wait for 5 seconds before checking again
+
+    # Step 4: Get Download Links
+    download_links = response.json()['links']
+    final_links = []
+    for link in download_links:
+        response = requests.post('https://api.real-debrid.com/rest/1.0/unrestrict/link', headers=headers, data={'link': link})
+        final_links.append(response.json()['download'])
+
+    return jsonify({'download_links': final_links})
