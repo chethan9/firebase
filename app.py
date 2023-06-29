@@ -1,7 +1,7 @@
 # app.py
 import subprocess
 import uuid
-from flask import Flask, request, jsonify, send_file, abort
+from flask import Flask, request, jsonify, send_file, abort, make_response
 from bs4 import BeautifulSoup
 import requests
 from werkzeug.utils import secure_filename
@@ -16,11 +16,11 @@ def create_app():
     upload_folder = app.config['UPLOAD_FOLDER']
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
-    # Other setup code...
     return app
 
 
 app = create_app()
+
 
 @app.route('/', methods=['GET'])
 def homepage():
@@ -67,11 +67,13 @@ def tor():
                 "Download": download_link[0] if download_link else None
             }
             data.append(row_dict)
-        return jsonify({"movies": data}), 200
+        response = make_response(jsonify({"movies": data}), 200)
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        return response
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
+        response = make_response(jsonify({"error": str(e)}), 500)
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        return response
 
 
 @app.route('/magnet', methods=['GET'])
@@ -94,6 +96,7 @@ def magnet():
 
 @app.route('/parse', methods=['GET'])
 def parse():
+```python
     filename = request.args.get('filename')
     info = PTN.parse(filename)
     return jsonify(info)
