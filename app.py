@@ -199,7 +199,7 @@ def bolt():
         # Then, for each movie in the data, check for valid magnet links
         valid_data = []
         for movie in data:
-            download_link = movie['Download']
+            download_link = movie['mainDownload']
             if download_link:
                 response = requests.get(download_link)
                 soup = BeautifulSoup(response.text, 'html.parser')
@@ -207,13 +207,13 @@ def bolt():
                 if magnet_link_tag:
                     magnet_link = magnet_link_tag.get('href')
                     if 'magnet:?xt=' in magnet_link:
-                        movie['Download'] = magnet_link
+                        movie['mainDownload'] = magnet_link
                         valid_data.append(movie)
         
         # Finally, for each movie in valid_data, parse the title
         parsed_data = []
         for movie in valid_data:
-            title = movie['Title']
+            title = movie['mainTitle']
             parsed_title = PTN.parse(title)
             movie.update(parsed_title)
             parsed_data.append(movie)
