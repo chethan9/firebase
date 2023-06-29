@@ -189,3 +189,56 @@ def tor2():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
+
+@app.route('/movie', methods=['GET'])
+def movie():
+    try:
+        name = request.args.get('name')
+        url = "https://2torrentz2eu.in/beta2/search.php?torrent-query=" + name
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        table = soup.find('table')
+        rows = table.find_all('tr')
+        data = []
+        for row in rows:
+            cols = row.find_all('td')
+            if len(cols) < 5:
+                continue  # Skip rows with fewer than 5 td elements
+            seeds = int(cols[1].text.strip())
+            if seeds == 0:
+                continue  # Skip torrents with zero seeds
+            download_button = [col.find('button', class_='ui blue basic button') for col in cols]
+            download_link = []
+            for button in download_button:
+                if button:
+                    onclick_text = button.get('onclick')
+                    link = onclick_text.split("'")[1]
+                    full_link = "https://2torrentz2eu.in/beta2/page.php?url=" + link
+                    download_link.append(full_link)
+            # Remove empty strings from download_link
+            download_link = [link for link in download_link if link]
+            if not download_link:
+                continue  # Skip torrents without a download link
+            cols = [col.text.strip() for col in cols]
+            title = cols[0]
+            parsed_title = PTN.parse(title)  # Parse the title
+            # Create a dictionary for each row
+            row_dict = {
+                "Title": title,
+                "Parsed Title": parsed_title,
+                "Seeds": seeds,
+                "Leeches": int(cols[2]),
+                "Size": cols[3],
+                "Date": cols[4],
+                "Download": download_link[0]
+            }
+            data.append(row_dict)
+        response = make_response(jsonify({"movies": data}), 200)
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
+    except Exception as e:
+        response = make_response(jsonify({"error": str(e)}), 500)
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
