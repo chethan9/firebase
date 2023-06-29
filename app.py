@@ -68,14 +68,14 @@ def tor():
             # Create a dictionary for each row
             row_dict = {
                 "Title": cols[0],
-                "Seeds": cols[1],
-                "Leeches": cols[2],
+                "Seeds": int(cols[1]),
+                "Leeches": int(cols[2]),
                 "Size": cols[3],
                 "Date": cols[4],
                 "Download": download_link[0] if download_link else None
             }
             data.append(row_dict)
-        return jsonify({"result": data}), 200
+        return jsonify({"movies": data}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
