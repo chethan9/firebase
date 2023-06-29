@@ -91,8 +91,7 @@ def magnet():
         if 'magnet:?xt=' in magnet_link:
             return magnet_link
         else:
-            return "Error: The link does not contain 'magnet```python
-:?xt='", 404
+            return "Error: The link does not contain magnet", 404
     else:
         return "Error: Could not find the 'Open Magnet' button", 404
 
