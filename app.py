@@ -185,12 +185,12 @@ def bolt():
             cols = [col.text.strip() for col in cols]
             # Create a dictionary for each row
             row_dict = {
-                "Title": cols[0],
-                "Seeds": int(cols[1]),
-                "Leeches": int(cols[2]),
-                "Size": cols[3],
-                "Date": cols[4],
-                "Download": download_link[0] if download_link else None
+                "mainTitle": cols[0],
+                "mainSeeds": int(cols[1]),
+                "mainLeeches": int(cols[2]),
+                "mainSize": cols[3],
+                "mainDate": cols[4],
+                "mainDownload": download_link[0] if download_link else None
             }
             data.append(row_dict)
         
