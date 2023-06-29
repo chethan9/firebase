@@ -156,3 +156,73 @@ def movie():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
+
+@app.route('/bolt', methods=['GET'])
+def bolt():
+    try:
+        # First, get the data from the /tor endpoint
+        name = request.args.get('name')
+        url = "https://2torrentz2eu.in/beta2/search.php?torrent-query=" + name
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        table = soup.find('table')
+        rows = table.find_all('tr')
+        data = []
+        for row in rows:
+            cols = row.find_all('td')
+            if len(cols) < 5:
+                continue  # Skip rows with fewer than 5 td elements
+            download_button = [col.find('button', class_='ui blue basic button') for col in cols]
+            download_link = []
+            for button in download_button:
+                if button:
+                    onclick_text = button.get('onclick')
+                    link = onclick_text.split("'")[1]
+                    full_link = "https://2torrentz2eu.in/beta2/page.php?url=" + link
+                    download_link.append(full_link)
+            # Remove empty strings from download_link
+            download_link = [link for link in download_link if link]
+            cols = [col.text.strip() for col in cols]
+            # Create a dictionary for each row
+            row_dict = {
+                "Title": cols[0],
+                "Seeds": int(cols[1]),
+                "Leeches": int(cols[2]),
+                "Size": cols[3],
+                "Date": cols[4],
+                "Download": download_link[0] if download_link else None
+            }
+            data.append(row_dict)
+        
+        # Then, for each movie in the data, check for valid magnet links
+        valid_data = []
+        for movie in data:
+            download_link = movie['Download']
+            if download_link:
+                response = requests.get(download_link)
+                soup = BeautifulSoup(response.text, 'html.parser')
+                magnet_link_tag = soup.find('a', class_='download-button', id='magnet')
+                if magnet_link_tag:
+                    magnet_link = magnet_link_tag.get('href')
+                    if 'magnet:?xt=' in magnet_link:
+                        movie['Download'] = magnet_link
+                        valid_data.append(movie)
+        
+        # Finally, for each movie in valid_data, parse the title
+        parsed_data = []
+        for movie in valid_data:
+            title = movie['Title']
+            parsed_title = PTN.parse(title)
+            movie.update(parsed_title)
+            parsed_data.append(movie)
+
+        response = make_response(jsonify({"movies": parsed_data}), 200)
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
+    except Exception as e:
+        response = make_response(jsonify({"error": str(e)}), 500)
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
+
