@@ -29,11 +29,6 @@ def homepage():
     return "Homepage"
 
 
-@app.route('/hello', methods=['GET'])
-def hello():
-    return "Hello"
-
-
 @app.route('/tor', methods=['GET'])
 def tor():
     try:
