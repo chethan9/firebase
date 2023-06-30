@@ -273,10 +273,10 @@ def leet():
             row_dict = {
                 "Title": title,
                 "Seeds": seeds,
-                "Leeches": int(cols[5].text),
-                "Size": cols[1].text,  # Don't strip "Size"
-                "Date": cols[3].text,  # Don't strip "Date"
-                "Uploader": cols[6].text.strip(),
+                "Leeches": int(cols[5]),
+                "Size": cols[1],  
+                "Date": cols[3], 
+                "Uploader": cols[6],
                 "Download": download_link,
                 "Magnet": magnet_link
             }
