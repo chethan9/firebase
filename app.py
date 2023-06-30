@@ -199,37 +199,40 @@ def movie():
         url = "https://2torrentz2eu.in/beta2/search.php?torrent-query=" + name
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
-        table = soup.find('table', {'class': 'table-list table table-responsive table-striped'})
+        table = soup.find('table')
         rows = table.find_all('tr')
         data = []
-        for row in rows[1:]:  # Skip the header row
+        for row in rows:
             cols = row.find_all('td')
+            if len(cols) < 5:
+                continue  # Skip rows with fewer than 5 td elements
             seeds = int(cols[1].text.strip())
             if seeds == 0:
                 continue  # Skip torrents with zero seeds
-            title_link = cols[0].find('a')
-            title = title_link.text
-            download_link = "https://2torrentz2eu.in/beta2/" + title_link.get('href')
-            # Get magnet link
-            magnet_response = requests.get(download_link)
-            magnet_soup = BeautifulSoup(magnet_response.text, 'html.parser')
-            magnet_link_tag = magnet_soup.find('a', href=lambda href: href and href.startswith('magnet:?'))
-            if not magnet_link_tag:
-                continue  # Skip torrents without a magnet link
-            magnet_link = magnet_link_tag.get('href')
-            # Parse the title
-            parsed_title = PTN.parse(title)
+            download_button = [col.find('button', class_='ui blue basic button') for col in cols]
+            download_link = []
+            for button in download_button:
+                if button:
+                    onclick_text = button.get('onclick')
+                    link = onclick_text.split("'")[1]
+                    full_link = "https://2torrentz2eu.in/beta2/page.php?url=" + link
+                    download_link.append(full_link)
+            # Remove empty strings from download_link
+            download_link = [link for link in download_link if link]
+            cols = [col.text.strip() for col in cols]
+            title = cols[0]
+            parsed_title = PTN.parse(title)  # Parse the title
             # Create a dictionary for each row
             row_dict = {
                 "mTitle": title,
-                "mParsed Title": parsed_title,
                 "mSeeds": seeds,
-                "mLeeches": int(cols[2].text.strip()),
-                "mSize": cols[3].text,  # Don't strip "Size"
-                "mDate": cols[4].text,  # Don't strip "Date"
-                "mDownload": download_link,
-                "mMagnet": magnet_link
+                "mLeeches": int(cols[2]),
+                "mSize": cols[3],
+                "mDate": cols[4],
+                "mDownload": download_link[0]
             }
+            # Merge parsed title into row_dict
+            row_dict.update(parsed_title)
             data.append(row_dict)
         response = make_response(jsonify({"movies": data}), 200)
         response.headers["Content-Type"] = "application/json; charset=utf-8"
@@ -240,9 +243,6 @@ def movie():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
-
-
-
 
 @app.route('/1337', methods=['GET'])
 def leet():
