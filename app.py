@@ -89,11 +89,11 @@ def magnet():
     if magnet_link_tag:
         magnet_link = magnet_link_tag.get('href')
         if 'magnet:?xt=' in magnet_link:
-            return magnet_link
+            return jsonify({'magnet_link': magnet_link})
         else:
-            return "Error: The link does not contain magnet", 404
+            return jsonify({'error': "The link does not contain magnet"}), 404
     else:
-        return "Error: Could not find the 'Open Magnet' button", 404
+        return jsonify({'error': "Could not find the 'Open Magnet' button"}), 404
 
 @app.route('/parse', methods=['GET'])
 def parse():
