@@ -274,8 +274,8 @@ def leet():
                 "Title": title,
                 "Seeds": seeds,
                 "Leeches": int(cols[2].text.strip()),
-                "Size": cols[3].text,  # Don't strip "Size"
-                "Date": cols[4].text,  # Don't strip "Date"
+                "Size": cols[4].text,  # Don't strip "Size"
+                "Date": cols[3].text,  # Don't strip "Date"
                 "Uploader": cols[5].text,
                 "Download": download_link,
                 "Magnet": magnet_link
@@ -290,4 +290,3 @@ def leet():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
-
