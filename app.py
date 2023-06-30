@@ -259,7 +259,7 @@ def leet():
             seeds = int(cols[1].text.strip())
             if seeds == 0:
                 continue  # Skip torrents with zero seeds
-            title_link = cols[0].find('a')
+            title_link = cols[0].find('a', href=True, class_=False)  # Exclude the icon link
             title = title_link.text
             download_link = "https://www.1377x.to" + title_link.get('href')
             # Get magnet link
