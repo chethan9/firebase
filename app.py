@@ -256,7 +256,7 @@ def leet():
         data = []
         for row in rows[1:]:  # Skip the header row
             cols = row.find_all('td')
-            seeds = int(cols[4].text)
+            seeds = int(cols[1].text.strip())
             if seeds == 0:
                 continue  # Skip torrents with zero seeds
             title_link = cols[0].find('a')
@@ -273,10 +273,10 @@ def leet():
             row_dict = {
                 "Title": title,
                 "Seeds": seeds,
-                "Leeches": int(cols[5]),
-                "Size": cols[1],  
-                "Date": cols[3], 
-                "Uploader": cols[6],
+                "Leeches": int(cols[2].text.strip()),
+                "Size": cols[3].text,  # Don't strip "Size"
+                "Date": cols[4].text,  # Don't strip "Date"
+                "Uploader": cols[5].text,
                 "Download": download_link,
                 "Magnet": magnet_link
             }
@@ -290,3 +290,4 @@ def leet():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
+
