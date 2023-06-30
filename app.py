@@ -256,11 +256,11 @@ def leet():
         data = []
         for row in rows[1:]:  # Skip the header row
             cols = row.find_all('td')
-            seeds = int(cols[4].text.strip())
+            seeds = int(cols[4].text)
             if seeds == 0:
                 continue  # Skip torrents with zero seeds
             title_link = cols[0].find('a')
-            title = title_link.text.strip()
+            title = title_link.text
             download_link = "https://www.1377x.to" + title_link.get('href')
             # Get magnet link
             magnet_response = requests.get(download_link)
@@ -273,9 +273,9 @@ def leet():
             row_dict = {
                 "Title": title,
                 "Seeds": seeds,
-                "Leeches": int(cols[5].text.strip()),
-                "Size": cols[1].text.strip(),  # Keep "Size" as a string
-                "Date": cols[3].text.strip(),
+                "Leeches": int(cols[5].text),
+                "Size": cols[1].text,  # Don't strip "Size"
+                "Date": cols[3].text,  # Don't strip "Date"
                 "Uploader": cols[6].text.strip(),
                 "Download": download_link,
                 "Magnet": magnet_link
