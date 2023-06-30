@@ -9,7 +9,7 @@ import os
 import ffmpeg
 import PTN
 import time
-from urllib.parse import quote
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 app = Flask(__name__)
 
@@ -80,8 +80,9 @@ def tor():
 def magnet():
     url = request.args.get('url')
     parsed_url = urlparse(url)
-    encoded_path = quote(parsed_url.path, safe='')
-    encoded_url = f"{parsed_url.scheme}://{parsed_url.netloc}{encoded_path}"
+    query = parse_qs(parsed_url.query)
+    query['url'] = quote(query['url'][0], safe='')  # URL-encode the value of the "url" query parameter
+    encoded_url = urlunparse(parsed_url._replace(query=urlencode(query, doseq=True)))
     response = requests.get(encoded_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     magnet_link_tag = soup.find('a', class_='download-button', id='magnet')
