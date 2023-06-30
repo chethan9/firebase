@@ -200,6 +200,8 @@ def movie():
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         table = soup.find('table')
+        if table is None:
+            raise ValueError("No table found in the HTML")
         rows = table.find_all('tr')
         data = []
         for row in rows[1:]:  # Skip the header row
@@ -240,6 +242,7 @@ def movie():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
+
 
 
 @app.route('/1337', methods=['GET'])
