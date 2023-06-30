@@ -9,6 +9,7 @@ import os
 import ffmpeg
 import PTN
 import time
+from urllib.parse import quote
 
 app = Flask(__name__)
 
@@ -78,20 +79,18 @@ def tor():
 @app.route('/magnet', methods=['GET'])
 def magnet():
     url = request.args.get('url')
+    url = quote(url, safe='')  # URL-encode the URL
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
-    # Find the 'a' tag with class 'download-button' and id 'magnet'
     magnet_link_tag = soup.find('a', class_='download-button', id='magnet')
     if magnet_link_tag:
         magnet_link = magnet_link_tag.get('href')
-        # Check if the link contains 'magnet:?xt='
         if 'magnet:?xt=' in magnet_link:
             return magnet_link
         else:
             return "Error: The link does not contain magnet", 404
     else:
         return "Error: Could not find the 'Open Magnet' button", 404
-
 
 @app.route('/parse', methods=['GET'])
 def parse():
