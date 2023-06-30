@@ -243,3 +243,50 @@ def movie():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
+
+@app.route('/1337', methods=['GET'])
+def leet():
+    try:
+        name = request.args.get('name')
+        url = "https://www.1377x.to/search/" + name + "/1/"
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        table = soup.find('table')
+        rows = table.find_all('tr')
+        data = []
+        for row in rows[1:]:  # Skip the header row
+            cols = row.find_all('td')
+            seeds = int(cols[4].text.strip())
+            if seeds == 0:
+                continue  # Skip torrents with zero seeds
+            title_link = cols[0].find('a')
+            title = title_link.text.strip()
+            download_link = "https://www.1377x.to" + title_link.get('href')
+            # Get magnet link
+            magnet_response = requests.get(download_link)
+            magnet_soup = BeautifulSoup(magnet_response.text, 'html.parser')
+            magnet_link_tag = magnet_soup.find('a', href=lambda href: href and href.startswith('magnet:?'))
+            if not magnet_link_tag:
+                continue  # Skip torrents without a magnet link
+            magnet_link = magnet_link_tag.get('href')
+            # Create a dictionary for each row
+            row_dict = {
+                "Title": title,
+                "Seeds": seeds,
+                "Leeches": int(cols[5].text.strip()),
+                "Size": cols[1].text.strip(),
+                "Date": cols[3].text.strip(),
+                "Uploader": cols[6].text.strip(),
+                "Download": download_link,
+                "Magnet": magnet_link
+            }
+            data.append(row_dict)
+        response = make_response(jsonify({"movies": data}), 200)
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
+    except Exception as e:
+        response = make_response(jsonify({"error": str(e)}), 500)
+        response.headers["Content-Type"] = "application/json; charset=utf-8"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
