@@ -274,7 +274,7 @@ def leet():
                 "Title": title,
                 "Seeds": seeds,
                 "Leeches": int(cols[5].text.strip()),
-                "Size": cols[1].text.strip(),
+                "Size": cols[1].text.strip(),  # Keep "Size" as a string
                 "Date": cols[3].text.strip(),
                 "Uploader": cols[6].text.strip(),
                 "Download": download_link,
