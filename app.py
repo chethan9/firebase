@@ -196,12 +196,10 @@ def tor2():
 def movie():
     try:
         name = request.args.get('name')
-        url = "https://2torrentz2eu.in/beta2/search.php?q=" + name
+        url = "https://2torrentz2eu.in/beta2/search.php?torrent-query=" + name
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
-        table = soup.find('table')
-        if table is None:
-            raise ValueError("No table found in the HTML")
+        table = soup.find('table', {'class': 'table-list table table-responsive table-striped'})
         rows = table.find_all('tr')
         data = []
         for row in rows[1:]:  # Skip the header row
@@ -242,6 +240,7 @@ def movie():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
+
 
 
 
