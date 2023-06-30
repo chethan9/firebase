@@ -79,8 +79,10 @@ def tor():
 @app.route('/magnet', methods=['GET'])
 def magnet():
     url = request.args.get('url')
-    url = quote(url, safe='')  # URL-encode the URL
-    response = requests.get(url)
+    parsed_url = urlparse(url)
+    encoded_path = quote(parsed_url.path, safe='')
+    encoded_url = f"{parsed_url.scheme}://{parsed_url.netloc}{encoded_path}"
+    response = requests.get(encoded_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     magnet_link_tag = soup.find('a', class_='download-button', id='magnet')
     if magnet_link_tag:
