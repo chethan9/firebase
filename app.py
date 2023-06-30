@@ -9,7 +9,7 @@ import os
 import ffmpeg
 import PTN
 import time
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
 
 app = Flask(__name__)
 
@@ -81,7 +81,7 @@ def magnet():
     url = request.args.get('url')
     parsed_url = urlparse(url)
     query = parse_qs(parsed_url.query)
-    query['url'] = quote(query['url'][0], safe='')  # URL-encode the value of the "url" query parameter
+    query['url'] = [quote(query['url'][0], safe='')]  # URL-encode the value of the "url" query parameter
     encoded_url = urlunparse(parsed_url._replace(query=urlencode(query, doseq=True)))
     response = requests.get(encoded_url)
     soup = BeautifulSoup(response.text, 'html.parser')
