@@ -291,6 +291,11 @@ def leet():
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
 
+from flask import Flask, request, jsonify
+import requests
+
+app = Flask(__name__)
+
 @app.route('/info', methods=['GET'])
 def info():
     name = request.args.get('name')
@@ -318,7 +323,9 @@ def info():
             'name': movie.get('title'),
             'poster_image_path': poster_path,
             'overview': movie.get('overview'),
-            'release_date': movie.get('release_date')
+            'release_date': movie.get('release_date'),
+            'type': 'Movie',
+            'popularity': movie.get('popularity', 0)
         })
 
     for tv_show in tv_data.get('results', []):
@@ -331,7 +338,13 @@ def info():
             'name': tv_show.get('name'),
             'poster_image_path': poster_path,
             'overview': tv_show.get('overview'),
-            'release_date': tv_show.get('first_air_date')
+            'release_date': tv_show.get('first_air_date'),
+            'type': 'TV Show',
+            'popularity': tv_show.get('popularity', 0)
         })
 
+    # Sort the results by popularity
+    results.sort(key=lambda x: x['popularity'], reverse=True)
+
     return jsonify(results)
+
