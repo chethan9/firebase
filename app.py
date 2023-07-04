@@ -321,7 +321,8 @@ def info():
             'overview': movie.get('overview'),
             'release_date': movie.get('release_date'),
             'type': 'Movie',
-            'popularity': movie.get('popularity', 0)
+            'popularity': movie.get('popularity', 0),
+            'original_language': movie.get('original_language')
         })
 
     for tv_show in tv_data.get('results', []):
@@ -336,7 +337,8 @@ def info():
             'overview': tv_show.get('overview'),
             'release_date': tv_show.get('first_air_date'),
             'type': 'TV Show',
-            'popularity': tv_show.get('popularity', 0)
+            'popularity': tv_show.get('popularity', 0),
+            'original_language': tv_show.get('original_language')
         })
 
     # Sort the results by popularity and prioritize items with images
