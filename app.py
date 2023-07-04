@@ -290,3 +290,48 @@ def leet():
         response.headers["Content-Type"] = "application/json; charset=utf-8"
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
+
+@app.route('/info', methods=['GET'])
+def info():
+    name = request.args.get('name')
+    api_key = "0308f0a9278f09cbd10fe7441ccc6664"  # replace with your actual TMDB API key
+
+    # Make API call to TMDB for movies
+    movie_url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={name}"
+    movie_response = requests.get(movie_url)
+    movie_data = movie_response.json()
+
+    # Make API call to TMDB for TV shows
+    tv_url = f"https://api.themoviedb.org/3/search/tv?api_key={api_key}&query={name}"
+    tv_response = requests.get(tv_url)
+    tv_data = tv_response.json()
+
+    # Combine the results
+    results = []
+    for movie in movie_data.get('results', []):
+        poster_path = movie.get('poster_path')
+        if poster_path is None:
+            poster_path = "https://i.ibb.co/72MHwtr/No-Image-Placeholder.jpg"
+        else:
+            poster_path = f"https://www.themoviedb.org/t/p/w94_and_h141_bestv2{poster_path}"
+        results.append({
+            'name': movie.get('title'),
+            'poster_image_path': poster_path,
+            'overview': movie.get('overview'),
+            'release_date': movie.get('release_date')
+        })
+
+    for tv_show in tv_data.get('results', []):
+        poster_path = tv_show.get('poster_path')
+        if poster_path is None:
+            poster_path = "https://i.ibb.co/72MHwtr/No-Image-Placeholder.jpg"
+        else:
+            poster_path = f"https://www.themoviedb.org/t/p/w94_and_h141_bestv2{poster_path}"
+        results.append({
+            'name': tv_show.get('name'),
+            'poster_image_path': poster_path,
+            'overview': tv_show.get('overview'),
+            'release_date': tv_show.get('first_air_date')
+        })
+
+    return jsonify(results)
