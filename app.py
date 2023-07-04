@@ -344,4 +344,4 @@ def info():
     # Sort the results by popularity and prioritize items with images
     results.sort(key=lambda x: (x['poster_image_path'] == "https://i.ibb.co/72MHwtr/No-Image-Placeholder.jpg", -x['popularity']))
 
-    return jsonify(results)
+    return jsonify({'info': results})
