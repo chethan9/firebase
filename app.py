@@ -419,6 +419,10 @@ def update_zoom_meeting():
     }
     response = requests.patch(f'https://api.zoom.us/v2/meetings/{meeting_id}', headers=headers, json=data)
 
-    # Return the response
-    return jsonify(response.json())
+    # Check the response
+    if response.status_code == 204:
+        return '', 204
+    else:
+        return jsonify(response.json()), response.status_code
+
 
