@@ -1,15 +1,16 @@
-# app.py
-import subprocess
-import uuid
-from flask import Flask, request, jsonify, send_file, abort, make_response
-from bs4 import BeautifulSoup
-import requests
-from werkzeug.utils import secure_filename
+from datetime import datetime, timedelta
+import jwt
 import os
-import ffmpeg
-import PTN
+import requests
 import time
+import uuid
+from bs4 import BeautifulSoup
+from flask import Flask, request, jsonify, make_response
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
+from werkzeug.utils import secure_filename
+import PTN
+
+
 
 app = Flask(__name__)
 
@@ -345,3 +346,38 @@ def info():
     results.sort(key=lambda x: (x['poster_image_path'] == "https://i.ibb.co/72MHwtr/No-Image-Placeholder.jpg", -x['popularity']))
 
     return jsonify({'info': results})
+
+
+
+@app.route('/zcreate', methods=['POST'])
+def create_zoom_meeting():
+    user_id = request.json.get('user_id')
+    api_key = request.json.get('api_key')
+    api_secret = request.json.get('api_secret')
+    topic = request.json.get('topic')
+    start_time = request.json.get('start_time')  # Expected format: '2023-07-21T10:00:00'
+    duration = request.json.get('duration')  # Expected in minutes
+
+    # Generate a JWT
+    payload = {
+        'iss': api_key,
+        'exp': datetime.now() + timedelta(minutes=15)
+    }
+    token = jwt.encode(payload, api_secret, algorithm='HS256')
+
+    # Create the meeting
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    data = {
+        'topic': topic,
+        'type': 2,  # Scheduled meeting
+        'start_time': start_time,
+        'duration': duration,
+        'timezone': 'Asia/Kuwait'
+    }
+    response = requests.post(f'https://api.zoom.us/v2/users/{user_id}/meetings', headers=headers, json=data)
+
+    # Return the meeting info
+    return jsonify(response.json())
