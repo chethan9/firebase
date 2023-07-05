@@ -19,9 +19,8 @@ current_directory = os.getcwd()
 
 # Set the log file path in the root directory
 log_file_path = os.path.join(current_directory, 'api.log')
-
 # Configure logging
-logging.basicConfig(filename=log_file_path, level=logging.INFO)
+logging.basicConfig(filename=log_file_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def create_app():
     app = Flask(__name__, static_folder='uploads', static_url_path='/uploads')
@@ -469,4 +468,28 @@ def get_zoom_meeting():
 
     # Return the meeting info
     return jsonify(response.json())
+
+@app.route('/logs', methods=['GET'])
+def get_logs():
+    start_date = request.args.get('start_date')  # Get the start date from query parameter
+    end_date = request.args.get('end_date')  # Get the end date from query parameter
+
+    # Check if both start date and end date are provided
+    if start_date and end_date:
+        logs = []
+        with open(log_file_path, 'r') as file:
+            for line in file:
+                log_data = line.strip().split(' - ')
+                log_timestamp = log_data[0]
+                log_level = log_data[1]
+                log_message = log_data[2]
+                if start_date <= log_timestamp <= end_date:
+                    logs.append({
+                        'timestamp': log_timestamp,
+                        'level': log_level,
+                        'message': log_message
+                    })
+        return jsonify(logs)
+    else:
+        return 'Please provide both start_date and end_date query parameters.', 400
 
