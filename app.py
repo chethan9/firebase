@@ -348,7 +348,6 @@ def info():
     return jsonify({'info': results})
 
 
-
 @app.route('/zcreate', methods=['POST'])
 def create_zoom_meeting():
     user_id = request.json.get('user_id')
@@ -357,6 +356,8 @@ def create_zoom_meeting():
     topic = request.json.get('topic')
     start_time = request.json.get('start_time')  # Expected format: '2023-07-21T10:00:00'
     duration = request.json.get('duration')  # Expected in minutes
+    agenda = request.json.get('agenda')
+    password = request.json.get('password')
 
     # Generate a JWT
     payload = {
@@ -375,7 +376,9 @@ def create_zoom_meeting():
         'type': 2,  # Scheduled meeting
         'start_time': start_time,
         'duration': duration,
-        'timezone': 'Asia/Kuwait'
+        'timezone': 'Asia/Kuwait',
+        'agenda': agenda,
+        'password': password
     }
     response = requests.post(f'https://api.zoom.us/v2/users/{user_id}/meetings', headers=headers, json=data)
 
@@ -390,6 +393,8 @@ def update_zoom_meeting():
     topic = request.json.get('topic')
     start_time = request.json.get('start_time')  # Expected format: '2023-07-21T10:00:00'
     duration = request.json.get('duration')  # Expected in minutes
+    agenda = request.json.get('agenda')
+    password = request.json.get('password')
 
     # Generate a JWT
     payload = {
@@ -408,9 +413,12 @@ def update_zoom_meeting():
         'type': 2,  # Scheduled meeting
         'start_time': start_time,
         'duration': duration,
-        'timezone': 'Asia/Kuwait'
+        'timezone': 'Asia/Kuwait',
+        'agenda': agenda,
+        'password': password
     }
     response = requests.patch(f'https://api.zoom.us/v2/meetings/{meeting_id}', headers=headers, json=data)
 
     # Return the response
     return jsonify(response.json())
+
