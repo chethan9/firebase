@@ -9,10 +9,19 @@ from flask import Flask, request, jsonify, make_response
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
 from werkzeug.utils import secure_filename
 import PTN
-
-
+import os
+import logging
 
 app = Flask(__name__)
+
+# Get the current directory
+current_directory = os.getcwd()
+
+# Set the log file path in the root directory
+log_file_path = os.path.join(current_directory, 'api.log')
+
+# Configure logging
+logging.basicConfig(filename=log_file_path, level=logging.INFO)
 
 def create_app():
     app = Flask(__name__, static_folder='uploads', static_url_path='/uploads')
@@ -25,6 +34,19 @@ def create_app():
 
 app = create_app()
 
+@app.before_request
+def before_request():
+    # This code will be executed before each request
+    app.logger.info('Request: %s %s', request.method, request.url)
+    app.logger.info('Headers: %s', request.headers)
+    app.logger.info('Body: %s', request.get_data())
+
+
+@app.after_request
+def after_request(response):
+    # This code will be executed after each request
+    app.logger.info('Response: %s', response.status)
+    return response
 
 @app.route('/', methods=['GET'])
 def homepage():
