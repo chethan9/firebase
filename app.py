@@ -425,4 +425,26 @@ def update_zoom_meeting():
     else:
         return jsonify(response.json()), response.status_code
 
+@app.route('/zinfo', methods=['GET'])
+def get_zoom_meeting():
+    meeting_id = request.args.get('meeting_id')
+    api_key = request.args.get('api_key')
+    api_secret = request.args.get('api_secret')
+
+    # Generate a JWT
+    payload = {
+        'iss': api_key,
+        'exp': datetime.now() + timedelta(minutes=15)
+    }
+    token = jwt.encode(payload, api_secret, algorithm='HS256')
+
+    # Get the meeting info
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(f'https://api.zoom.us/v2/meetings/{meeting_id}', headers=headers)
+
+    # Return the meeting info
+    return jsonify(response.json())
 
