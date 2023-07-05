@@ -16,8 +16,8 @@ ENV FLASK_RUN_HOST=0.0.0.0
 # Add current directory files to /app in container
 ADD . /app
 
-# Install necessary packages, Flask, BeautifulSoup, requests, ffmpeg-python, gunicorn, and parse-torrent-title
-RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn parse-torrent-title
+# Install necessary packages, Flask, BeautifulSoup, requests, ffmpeg-python, gunicorn, parse-torrent-title, and pyjwt
+RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn parse-torrent-title pyjwt
 
 # Make port 5000 available to the world outside this container
 # EXPOSE 5000
