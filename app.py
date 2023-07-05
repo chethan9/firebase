@@ -381,3 +381,36 @@ def create_zoom_meeting():
 
     # Return the meeting info
     return jsonify(response.json())
+
+@app.route('/zupdate', methods=['PATCH'])
+def update_zoom_meeting():
+    meeting_id = request.json.get('meeting_id')
+    api_key = request.json.get('api_key')
+    api_secret = request.json.get('api_secret')
+    topic = request.json.get('topic')
+    start_time = request.json.get('start_time')  # Expected format: '2023-07-21T10:00:00'
+    duration = request.json.get('duration')  # Expected in minutes
+
+    # Generate a JWT
+    payload = {
+        'iss': api_key,
+        'exp': datetime.now() + timedelta(minutes=15)
+    }
+    token = jwt.encode(payload, api_secret, algorithm='HS256')
+
+    # Update the meeting
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    data = {
+        'topic': topic,
+        'type': 2,  # Scheduled meeting
+        'start_time': start_time,
+        'duration': duration,
+        'timezone': 'Asia/Kuwait'
+    }
+    response = requests.patch(f'https://api.zoom.us/v2/meetings/{meeting_id}', headers=headers, json=data)
+
+    # Return the response
+    return jsonify(response.json())
