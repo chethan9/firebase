@@ -558,3 +558,6 @@ def search_google():
     top_results = [result['href'] for result in results[:10]]
 
     return jsonify(top_results)
+
+if __name__ == '__main__':
+    app.run(debug=True)
