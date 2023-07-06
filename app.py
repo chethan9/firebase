@@ -11,11 +11,6 @@ from werkzeug.utils import secure_filename
 import PTN
 import os
 import logging
-from flask import Flask, request, Response
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-import time
-
 
 app = Flask(__name__)
 
@@ -499,65 +494,3 @@ def get_logs():
         return 'Please provide both start_date and end_date query parameters.', 400
 
 
-
-@app.route('/google-lens', methods=['GET'])
-def google_lens():
-    image_url = request.args.get('url')
-
-    # Set up Firefox options for Selenium
-    options = Options()
-    options.headless = True  # Run Firefox in headless mode
-
-    # Set up Selenium to use Firefox
-    driver = webdriver.Firefox(options=options, executable_path='/var/lib/data/geckodriver')
-
-    # Visit the Google Lens page and input the image URL
-    driver.get(f'https://lens.google.com/uploadbyurl?url={image_url}')
-
-    # Wait for the page to load and the results to appear
-    # This may require more sophisticated waiting logic in practice
-    time.sleep(5)
-
-    # Get the page HTML
-    page_html = driver.page_source
-
-    # Close the Selenium driver
-    driver.quit()
-
-    return Response(page_html, mimetype='text/html')
-
-
-
-@app.route('/search-google', methods=['GET'])
-def search_google():
-    query = request.args.get('query')
-
-    # Set up Firefox options for Selenium
-    options = Options()
-    options.headless = True  # Run Firefox in headless mode
-
-    # Set up Selenium to use Firefox
-    driver = webdriver.Firefox(options=options)
-
-    # Open Google search with the query
-    driver.get(f'https://www.google.com/search?q={query}')
-
-    # Get the page HTML
-    page_html = driver.page_source
-
-    # Close the Selenium driver
-    driver.quit()
-
-    # Parse the page HTML with BeautifulSoup
-    soup = BeautifulSoup(page_html, 'html.parser')
-
-    # Find the search result links
-    results = soup.select('div.r a')
-
-    # Extract the top 10 search result links
-    top_results = [result['href'] for result in results[:10]]
-
-    return jsonify(top_results)
-
-if __name__ == '__main__':
-    app.run(debug=True)
