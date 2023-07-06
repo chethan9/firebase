@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 import PTN
 import os
 import logging
+from selenium import webdriver
 
 app = Flask(__name__)
 
@@ -493,3 +494,38 @@ def get_logs():
     else:
         return 'Please provide both start_date and end_date query parameters.', 400
 
+
+@app.route('/google-lens', methods=['GET'])
+def google_lens():
+    image_url = request.args.get('url')
+    driver = webdriver.Firefox(executable_path='<path_to_geckodriver>')  # replace with the path to your geckodriver
+
+    # Visit the Google Lens page and input the image URL
+    driver.get(f'https://lens.google.com/uploadbyurl?url={image_url}')
+
+    # Wait for the page to load and the results to appear
+    # This may require more sophisticated waiting logic in practice
+    time.sleep(5)
+
+    # Parse the page HTML with BeautifulSoup
+    soup = BeautifulSoup(driver.page_source, 'html.parser')
+
+    # Find the search results
+    results = soup.find_all('div', class_='search-result')
+
+    # Extract the top 30 results
+    top_results = []
+    for result in results[:30]:
+        title = result.find('div', class_='title').text
+        link = result.find('a')['href']
+        position = results.index(result) + 1  # 1-indexed
+        image = result.find('img')['src']
+
+        top_results.append({
+            'title': title,
+            'link': link,
+            'position': position,
+            'image': image,
+        })
+
+    return jsonify(top_results)
