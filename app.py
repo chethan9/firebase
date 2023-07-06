@@ -525,3 +525,36 @@ def google_lens():
     driver.quit()
 
     return Response(page_html, mimetype='text/html')
+
+
+
+@app.route('/search-google', methods=['GET'])
+def search_google():
+    query = request.args.get('query')
+
+    # Set up Firefox options for Selenium
+    options = Options()
+    options.headless = True  # Run Firefox in headless mode
+
+    # Set up Selenium to use Firefox
+    driver = webdriver.Firefox(options=options)
+
+    # Open Google search with the query
+    driver.get(f'https://www.google.com/search?q={query}')
+
+    # Get the page HTML
+    page_html = driver.page_source
+
+    # Close the Selenium driver
+    driver.quit()
+
+    # Parse the page HTML with BeautifulSoup
+    soup = BeautifulSoup(page_html, 'html.parser')
+
+    # Find the search result links
+    results = soup.select('div.r a')
+
+    # Extract the top 10 search result links
+    top_results = [result['href'] for result in results[:10]]
+
+    return jsonify(top_results)
