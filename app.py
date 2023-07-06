@@ -11,11 +11,10 @@ from werkzeug.utils import secure_filename
 import PTN
 import os
 import logging
+from flask import Flask, request, Response
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
-from bs4 import BeautifulSoup
 import time
-
 
 
 app = Flask(__name__)
@@ -519,29 +518,10 @@ def google_lens():
     # This may require more sophisticated waiting logic in practice
     time.sleep(5)
 
-    # Parse the page HTML with BeautifulSoup
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-
-    # Find the search results
-    results = soup.find_all('div', class_='search-result')
-
-    # Extract the top 30 results
-    top_results = []
-    for result in results[:30]:
-        title = result.find('div', class_='title').text
-        link = result.find('a')['href']
-        position = results.index(result) + 1  # 1-indexed
-        image = result.find('img')['src']
-
-        top_results.append({
-            'title': title,
-            'link': link,
-            'position': position,
-            'image': image,
-        })
+    # Get the page HTML
+    page_html = driver.page_source
 
     # Close the Selenium driver
     driver.quit()
 
-    return jsonify(top_results)
-
+    return Response(page_html, mimetype='text/html')
