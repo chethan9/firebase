@@ -124,40 +124,6 @@ def parse():
     return jsonify(info)
 
 
-@app.route('/freebird', methods=['POST'])
-def freebird():
-    magnet_link = request.json.get('magnet_link')
-    token = "6G7ZWHULQ7WXTTX6DD4CJKGA3OYY6F7HMXHYVL6JS6KXO3YSZAJQ"  # Replace with your actual token
-
-    headers = {
-        'Authorization': f'Bearer {token}'
-    }
-
-    # Step 1: Add Magnet
-    response = requests.post('https://api.real-debrid.com/rest/1.0/torrents/addMagnet', headers=headers, data={'magnet': magnet_link})
-    torrent_id = response.json()['id']
-
-    # Step 2: Select Items to Download
-    requests.post(f'https://api.real-debrid.com/rest/1.0/torrents/selectFiles/{torrent_id}', headers=headers, data={'files': 'all'})
-
-    # Step 3: Fetch Torrent Info and wait for status to change to 'downloaded'
-    while True:
-        response = requests.get(f'https://api.real-debrid.com/rest/1.0/torrents/info/{torrent_id}', headers=headers)
-        status = response.json()['status']
-        if status == 'downloaded':
-            break
-        time.sleep(5)  # Wait for 5 seconds before checking again
-
-    # Step 4: Get Download Links
-    download_links = response.json()['links']
-    final_links = []
-    for link in download_links:
-        response = requests.post('https://api.real-debrid.com/rest/1.0/unrestrict/link', headers=headers, data={'link': link})
-        final_links.append(response.json()['download'])
-
-    return jsonify({'download_links': final_links})
-
-
 @app.route('/tor2', methods=['GET'])
 def tor2():
     try:
@@ -490,7 +456,49 @@ def get_logs():
                         'message': log_message
                     })
         return jsonify(logs)
+
     else:
         return 'Please provide both start_date and end_date query parameters.', 400
 
+
+@app.route('/freebird', methods=['POST'])
+def freebird():
+    # Step 1: Receive a Request
+    magnet_link = request.json['magnet_link']
+
+    # Step 2: Generate Authorization Token
+    token = 'your_real_debrid_token'  # replace with your actual token
+
+    # Step 3: Add Magnet to Real-Debrid
+    headers = {'Authorization': 'Bearer ' + token}
+    data = {'magnet': magnet_link}
+    response = requests.post('https://api.real-debrid.com/rest/1.0/torrents/addMagnet', headers=headers, data=data)
+
+    # New Step 4: Retrieve file list and filter for video files
+    torrent_id = response.json()['id']
+    response = requests.get(f'https://api.real-debrid.com/rest/1.0/torrents/info/{torrent_id}', headers=headers)
+    files = response.json()['files']
+    video_formats = ['.mp4', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.mpeg', '.3gp', '.webm', '.vob', '.rm', '.swf', '.asf', '.ts', '.mpg', '.m4v', '.ogv', '.qt', '.rmvb', '.mts']
+    video_files = [file['id'] for file in files if any(file['path'].lower().endswith(ext) for ext in video_formats)]
+
+    # Modified Step 5: Select video files to download
+    data = {'files': ','.join(map(str, video_files))}
+    response = requests.post(f'https://api.real-debrid.com/rest/1.0/torrents/selectFiles/{torrent_id}', headers=headers, data=data)
+
+    # Step 6: Wait for Download to Complete
+    while True:
+        response = requests.get(f'https://api.real-debrid.com/rest/1.0/torrents/info/{torrent_id}', headers=headers)
+        if response.json()['status'] == 'downloaded':
+            break
+
+    # Step 7: Get Download Links
+    links = response.json()['links']
+    download_links = []
+    for link in links:
+        data = {'link': link}
+        response = requests.post('https://api.real-debrid.com/rest/1.0/unrestrict/link', headers=headers, data=data)
+        download_links.append(response.json()['download'])
+
+    # Step 8: Return Download Links
+    return {'download_links': download_links}
 
