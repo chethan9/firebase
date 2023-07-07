@@ -474,14 +474,14 @@ def freebird():
     data = {'magnet': magnet_link}
     response = requests.post('https://api.real-debrid.com/rest/1.0/torrents/addMagnet', headers=headers, data=data)
 
-    # New Step 4: Retrieve file list and filter for video files
+    # Step 4: Retrieve file list and filter for video files
     torrent_id = response.json()['id']
     response = requests.get(f'https://api.real-debrid.com/rest/1.0/torrents/info/{torrent_id}', headers=headers)
     files = response.json()['files']
     video_formats = ['.mp4', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.mpeg', '.3gp', '.webm', '.vob', '.rm', '.swf', '.asf', '.ts', '.mpg', '.m4v', '.ogv', '.qt', '.rmvb', '.mts']
     video_files = [file['id'] for file in files if any(file['path'].lower().endswith(ext) for ext in video_formats)]
 
-    # Modified Step 5: Select video files to download
+    # Step 5: Select video files to download
     data = {'files': ','.join(map(str, video_files))}
     response = requests.post(f'https://api.real-debrid.com/rest/1.0/torrents/selectFiles/{torrent_id}', headers=headers, data=data)
 
@@ -491,13 +491,26 @@ def freebird():
         if response.json()['status'] == 'downloaded':
             break
 
-    # Step 7: Get Download Links
+    # Step 7: Get Download Links and Parse Titles
     links = response.json()['links']
     download_links = []
-    for link in links:
+    for i, link in enumerate(links, start=1):
         data = {'link': link}
         response = requests.post('https://api.real-debrid.com/rest/1.0/unrestrict/link', headers=headers, data=data)
-        download_links.append(response.json()['download'])
+        download_link = response.json()['download']
+        parsed_title = PTN.parse(download_link.split('/')[-1])
+        download_links.append({
+            'id': i,
+            'download_link': download_link,
+            'title': parsed_title.get('title'),
+            'year': parsed_title.get('year'),
+            'resolution': parsed_title.get('resolution'),
+            'codec': parsed_title.get('codec'),
+            'encoder': parsed_title.get('group'),
+            'filetype': parsed_title.get('container'),
+            'quality': parsed_title.get('quality'),
+            'size': parsed_title.get('size'),
+        })
 
     # Step 8: Return Download Links
     return {'download_links': download_links}
