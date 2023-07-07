@@ -467,7 +467,7 @@ def freebird():
     magnet_link = request.json['magnet_link']
 
     # Step 2: Generate Authorization Token
-    token = 'your_real_debrid_token'  # replace with your actual token
+    token = '6G7ZWHULQ7WXTTX6DD4CJKGA3OYY6F7HMXHYVL6JS6KXO3YSZAJQ'  # replace with your actual token
 
     # Step 3: Add Magnet to Real-Debrid
     headers = {'Authorization': 'Bearer ' + token}
