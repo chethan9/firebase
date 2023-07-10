@@ -11,7 +11,7 @@ from werkzeug.utils import secure_filename
 import PTN
 import os
 import logging
-
+from cinemagoer import IMDb
 app = Flask(__name__)
 
 # Get the current directory
@@ -512,6 +512,13 @@ def freebird():
             'size': parsed_title.get('size'),
         })
 
+imdb = IMDb()
+
+@app.route('/imdb', methods=['GET'])
+def search_imdb():
+    query = request.args.get('query')
+    results = imdb.search(query)
+    return jsonify(results)
     # Step 8: Return Download Links
     return {'download_links': download_links}
 
