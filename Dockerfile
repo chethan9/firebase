@@ -34,7 +34,7 @@ ENV FLASK_RUN_HOST=0.0.0.0
 ADD . /app
 
 # Install necessary packages, Flask, BeautifulSoup, requests, ffmpeg-python, gunicorn, parse-torrent-title, pyjwt, selenium, cinemagoer, jsmin, css_html_js_minify
-RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn parse-torrent-title pyjwt selenium cinemagoer jsmin css-html-js-minify
+RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn parse-torrent-title pyjwt selenium cinemagoer jsmin css_html_js_minify htmlmin
 
 # Make port 5000 available to the world outside this container
 # EXPOSE 5000
