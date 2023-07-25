@@ -515,71 +515,44 @@ def freebird():
 
 
 
-def extract_js(html_code):
-    soup = BeautifulSoup(html_code, 'html.parser')
-    scripts = soup.find_all('script')
-    js_code = '\n'.join([script.string for script in scripts if script.string is not None])
-    return js_code
-
-def extract_css(html_code):
-    soup = BeautifulSoup(html_code, 'html.parser')
-    styles = soup.find_all('style')
-    css_code = '\n'.join([style.string for style in styles if style.string is not None])
-    return css_code
-
-def replace_js_css(html_code, js_code, css_code):
-    soup = BeautifulSoup(html_code, 'html.parser')
-    
-    # Replace JavaScript
-    scripts = soup.find_all('script')
-    for script in scripts:
-        if script.string is not None:
-            script.string.replace_with(js_code)
-    
-    # Replace CSS
-    styles = soup.find_all('style')
-    for style in styles:
-        if style.string is not None:
-            style.string.replace_with(css_code)
-    
-    return str(soup)
-
 @app.route('/obfuscate', methods=['POST'])
 def obfuscate_code():
     data = request.get_json()
     url = data.get('url')
-    watermark = data.get('watermark')
-    
-    # Generate a random 6 digit alphanumeric value
-    random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
-    
+    # watermark = data.get('watermark')
+
     # Fetch the HTML code from the URL
     response = requests.get(url)
     html_code = response.text
+    
+    # Commenting out watermark and obfuscation logic
+    '''
+    # Generate a random 6 digit alphanumeric value
+    random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
     
     # Replace all instances of the watermark in the HTML code with a JavaScript function that generates the watermark
     html_code = html_code.replace(watermark, f'<span id="{random_id}"></span>')
     
     # Add the generateWatermark function to the JavaScript code
-    js_code = f"""
-    function generateWatermark() {{
+    js_code = """
+    function generateWatermark() {
         var watermark = '{watermark}';
         var parts = watermark.split('');
         var watermarkElement = document.getElementById('{random_id}');
-        for (var i = 0; i < parts.length; i++) {{
+        for (var i = 0; i < parts.length; i++) {
             var span = document.createElement('span');
             span.textContent = parts[i];
             watermarkElement.appendChild(span);
-        }}
-    }}
+        }
+    }
     generateWatermark();
 
-    function checkWatermark() {{
+    function checkWatermark() {
         var watermarkElement = document.getElementById('{random_id}');
-        if (watermarkElement.textContent !== '{watermark}') {{
+        if (watermarkElement.textContent !== '{watermark}') {
             location.reload();
-        }}
-    }}
+        }
+    }
     setInterval(checkWatermark, 1000);
     """
     
@@ -596,6 +569,9 @@ def obfuscate_code():
     
     # Replace the original JavaScript and CSS in the HTML code with the obfuscated and minified code
     obfuscated_html = replace_js_css(html_code, obfuscated_js, obfuscated_css)
+    '''
     
-    return obfuscated_html
+    return html_code
 
+if __name__ == '__main__':
+    app.run(debug=True)
