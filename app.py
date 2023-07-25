@@ -6,7 +6,14 @@ from jsmin import jsmin
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
 from werkzeug.utils import secure_filename
 import jwt, logging, os, PTN, random, requests, string, time, uuid
-
+from flask import Flask, request
+import requests
+from bs4 import BeautifulSoup
+from jsmin import jsmin
+from css_html_js_minify import process_single_css_file as minify_css
+from htmlmin import minify as htmlmin
+from bs4 import BeautifulSoup
+from cssutils import parseString
 
 app = Flask(__name__)
 
@@ -522,7 +529,7 @@ def extract_js(html_code):
     script_tags = soup.find_all('script')
     js_code = ''
     for tag in script_tags:
-        js_code += tag.string
+        js_code += tag.string if tag.string else ''
     return js_code
 
 def extract_css(html_code):
@@ -530,7 +537,7 @@ def extract_css(html_code):
     style_tags = soup.find_all('style')
     css_code = ''
     for tag in style_tags:
-        css_code += tag.string
+        css_code += tag.string if tag.string else ''
     return css_code
 
 def replace_js_css(html_code, js_code, css_code):
