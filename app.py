@@ -515,24 +515,25 @@ def freebird():
 
 
 
+
 @app.route('/obfuscate', methods=['POST'])
 def obfuscate_code():
     data = request.get_json()
     url = data.get('url')
-    # watermark = data.get('watermark')
+    watermark = data.get('watermark')
 
-    # Fetch the HTML code from the URL
-    response = requests.get(url)
-    html_code = response.text
-    
-    # Commenting out watermark and obfuscation logic
-    '''
     # Generate a random 6 digit alphanumeric value
     random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
     
+    # Fetch the HTML code from the URL
+    response = requests.get(url)
+    html_code = response.text
+
     # Replace all instances of the watermark in the HTML code with a JavaScript function that generates the watermark
     html_code = html_code.replace(watermark, f'<span id="{random_id}"></span>')
     
+    # Commenting out obfuscation logic
+    '''
     # Add the generateWatermark function to the JavaScript code
     js_code = """
     function generateWatermark() {
