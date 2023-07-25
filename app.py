@@ -432,7 +432,7 @@ def get_zoom_meeting():
     }
     response = requests.get(f'https://api.zoom.us/v2/meetings/{meeting_id}', headers=headers)
 
-    # Return the meeting info
+    # Return the meeting infod
     return jsonify(response.json())
 
 @app.route('/logs', methods=['GET'])
