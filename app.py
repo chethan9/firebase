@@ -516,63 +516,58 @@ def freebird():
 
 
 
+
+def extract_js(html_code):
+    soup = BeautifulSoup(html_code, 'html.parser')
+    script_tags = soup.find_all('script')
+    js_code = ''
+    for tag in script_tags:
+        js_code += tag.string
+    return js_code
+
+def extract_css(html_code):
+    soup = BeautifulSoup(html_code, 'html.parser')
+    style_tags = soup.find_all('style')
+    css_code = ''
+    for tag in style_tags:
+        css_code += tag.string
+    return css_code
+
+def replace_js_css(html_code, js_code, css_code):
+    soup = BeautifulSoup(html_code, 'html.parser')
+    script_tags = soup.find_all('script')
+    for tag in script_tags:
+        tag.string.replace_with(js_code)
+    
+    style_tags = soup.find_all('style')
+    for tag in style_tags:
+        tag.string.replace_with(css_code)
+    return str(soup)
+
 @app.route('/obfuscate', methods=['POST'])
 def obfuscate_code():
     data = request.get_json()
     url = data.get('url')
-    watermark = data.get('watermark')
 
-    # Generate a random 6 digit alphanumeric value
-    random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
-    
     # Fetch the HTML code from the URL
     response = requests.get(url)
     html_code = response.text
 
-    # Replace all instances of the watermark in the HTML code with a JavaScript function that generates the watermark
-    html_code = html_code.replace(watermark, f'<span id="{random_id}"></span>')
-    
-    # Commenting out obfuscation logic
-    '''
-    # Add the generateWatermark function to the JavaScript code
-    js_code = """
-    function generateWatermark() {
-        var watermark = '{watermark}';
-        var parts = watermark.split('');
-        var watermarkElement = document.getElementById('{random_id}');
-        for (var i = 0; i < parts.length; i++) {
-            var span = document.createElement('span');
-            span.textContent = parts[i];
-            watermarkElement.appendChild(span);
-        }
-    }
-    generateWatermark();
-
-    function checkWatermark() {
-        var watermarkElement = document.getElementById('{random_id}');
-        if (watermarkElement.textContent !== '{watermark}') {
-            location.reload();
-        }
-    }
-    setInterval(checkWatermark, 1000);
-    """
-    
     # Extract the JavaScript and CSS from the HTML code
     existing_js_code = extract_js(html_code)
     css_code = extract_css(html_code)
-    
-    # Combine the existing JavaScript code with the new code
-    combined_js_code = existing_js_code + js_code
-    
+
     # Obfuscate the JavaScript and CSS code
-    obfuscated_js = jsmin(combined_js_code)
+    obfuscated_js = jsmin(existing_js_code)
     obfuscated_css = minify_css(css_code)
     
     # Replace the original JavaScript and CSS in the HTML code with the obfuscated and minified code
     obfuscated_html = replace_js_css(html_code, obfuscated_js, obfuscated_css)
-    '''
     
-    return html_code
+    # Minify HTML
+    minified_html = htmlmin(obfuscated_html)
+    
+    return minified_html
 
 if __name__ == '__main__':
     app.run(debug=True)
