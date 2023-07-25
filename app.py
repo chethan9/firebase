@@ -1,16 +1,12 @@
-from datetime import datetime, timedelta
-import jwt
-import os
-import requests
-import time
-import uuid
 from bs4 import BeautifulSoup
+from css_html_js_minify import process_single_css_file as minify_css
+from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, make_response
+from jsmin import jsmin
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
 from werkzeug.utils import secure_filename
-import PTN
-import os
-import logging
+import jwt, logging, os, PTN, random, requests, string, time, uuid
+
 
 app = Flask(__name__)
 
@@ -514,3 +510,92 @@ def freebird():
 
     # Step 8: Return Download Links
     return {'download_links': download_links}
+
+
+
+
+
+def extract_js(html_code):
+    soup = BeautifulSoup(html_code, 'html.parser')
+    scripts = soup.find_all('script')
+    js_code = '\n'.join([script.string for script in scripts if script.string is not None])
+    return js_code
+
+def extract_css(html_code):
+    soup = BeautifulSoup(html_code, 'html.parser')
+    styles = soup.find_all('style')
+    css_code = '\n'.join([style.string for style in styles if style.string is not None])
+    return css_code
+
+def replace_js_css(html_code, js_code, css_code):
+    soup = BeautifulSoup(html_code, 'html.parser')
+    
+    # Replace JavaScript
+    scripts = soup.find_all('script')
+    for script in scripts:
+        if script.string is not None:
+            script.string.replace_with(js_code)
+    
+    # Replace CSS
+    styles = soup.find_all('style')
+    for style in styles:
+        if style.string is not None:
+            style.string.replace_with(css_code)
+    
+    return str(soup)
+
+@app.route('/obfuscate', methods=['POST'])
+def obfuscate_code():
+    data = request.get_json()
+    url = data.get('url')
+    watermark = data.get('watermark')
+    
+    # Generate a random 6 digit alphanumeric value
+    random_id = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+    
+    # Fetch the HTML code from the URL
+    response = requests.get(url)
+    html_code = response.text
+    
+    # Replace all instances of the watermark in the HTML code with a JavaScript function that generates the watermark
+    html_code = html_code.replace(watermark, f'<span id="{random_id}"></span>')
+    
+    # Add the generateWatermark function to the JavaScript code
+    js_code = f"""
+    function generateWatermark() {{
+        var watermark = '{watermark}';
+        var parts = watermark.split('');
+        var watermarkElement = document.getElementById('{random_id}');
+        for (var i = 0; i < parts.length; i++) {{
+            var span = document.createElement('span');
+            span.textContent = parts[i];
+            watermarkElement.appendChild(span);
+        }}
+    }}
+    generateWatermark();
+
+    function checkWatermark() {{
+        var watermarkElement = document.getElementById('{random_id}');
+        if (watermarkElement.textContent !== '{watermark}') {{
+            location.reload();
+        }}
+    }}
+    setInterval(checkWatermark, 1000);
+    """
+    
+    # Extract the JavaScript and CSS from the HTML code
+    existing_js_code = extract_js(html_code)
+    css_code = extract_css(html_code)
+    
+    # Combine the existing JavaScript code with the new code
+    combined_js_code = existing_js_code + js_code
+    
+    # Obfuscate the JavaScript and CSS code
+    obfuscated_js = jsmin(combined_js_code)
+    obfuscated_css = minify_css(css_code)
+    
+    # Replace the original JavaScript and CSS in the HTML code with the obfuscated and minified code
+    obfuscated_html = replace_js_css(html_code, obfuscated_js, obfuscated_css)
+    
+    return obfuscated_html
+
