@@ -515,7 +515,6 @@ def freebird():
 
 
 
-
 def extract_css(html_code):
     soup = BeautifulSoup(html_code, 'html.parser')
     style_tags = soup.find_all('style')
@@ -545,8 +544,11 @@ def obfuscate_code():
         css_code = extract_css(html_code)
 
         # Minify the CSS code
-        minified_css = minify_css(css_code)
-    
+        parser = cssutils.CSSParser()
+        css_stylesheet = parser.parseString(css_code)
+        cssutils.ser.prefs.useMinified()
+        minified_css = css_stylesheet.cssText.decode("utf-8")
+
         # Replace the original CSS in the HTML code with the minified CSS code
         obfuscated_html = replace_css(html_code, minified_css)
     
