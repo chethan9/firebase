@@ -517,6 +517,18 @@ def freebird():
 
 
 
+def extract_css(html_code):
+    soup = BeautifulSoup(html_code, 'html.parser')
+    style_tags = soup.find_all('style')
+    css_code = ''
+    for tag in style_tags:
+        css_code += tag.string if tag.string else ''
+    return css_code
+
+def obfuscate_css(css_code):
+    style = parseString(css_code)
+    return style.cssText
+
 @app.route('/obfuscate', methods=['POST'])
 def obfuscate_code():
     data = request.get_json()
@@ -526,10 +538,13 @@ def obfuscate_code():
     response = requests.get(url)
     html_code = response.text
 
-    # Obfuscate the HTML code
-    obfuscated_html = minify(html_code, remove_empty_space=True)
+    # Extract the CSS from the HTML code
+    css_code = extract_css(html_code)
 
-    return obfuscated_html
+    # Obfuscate the CSS code
+    obfuscated_css = obfuscate_css(css_code)
+
+    return obfuscated_css
 
 if __name__ == '__main__':
     app.run(debug=True)
