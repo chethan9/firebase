@@ -8,6 +8,7 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
 from datetime import datetime, timedelta
 from cssutils import parseString
 import jwt, logging, os, PTN, random, requests, string, time, uuid
+import cssutils
 
 app = Flask(__name__)
 
