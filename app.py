@@ -516,14 +516,6 @@ def freebird():
 
 
 
-def extract_js(html_code):
-    soup = BeautifulSoup(html_code, 'html.parser')
-    script_tags = soup.find_all('script')
-    js_code = ''
-    for tag in script_tags:
-        js_code += tag.string if tag.string else ''
-    return js_code
-
 def extract_css(html_code):
     soup = BeautifulSoup(html_code, 'html.parser')
     style_tags = soup.find_all('style')
@@ -532,12 +524,8 @@ def extract_css(html_code):
         css_code += tag.string if tag.string else ''
     return css_code
 
-def replace_js_css(html_code, js_code, css_code):
+def replace_css(html_code, css_code):
     soup = BeautifulSoup(html_code, 'html.parser')
-    script_tags = soup.find_all('script')
-    for tag in script_tags:
-        tag.string.replace_with(js_code)
-    
     style_tags = soup.find_all('style')
     for tag in style_tags:
         tag.string.replace_with(css_code)
@@ -552,19 +540,17 @@ def obfuscate_code():
     response = requests.get(url)
     html_code = response.text
 
-    # # Extract the JavaScript and CSS from the HTML code
-    # existing_js_code = extract_js(html_code)
-    # css_code = extract_css(html_code)
+    # Extract the CSS from the HTML code
+    css_code = extract_css(html_code)
 
-    # # Obfuscate the JavaScript and CSS code
-    # obfuscated_js = jsmin(existing_js_code)
-    # obfuscated_css = minify_css(css_code)
+    # Minify the CSS code
+    minified_css = minify_css(css_code)
     
-    # # Replace the original JavaScript and CSS in the HTML code with the obfuscated and minified code
-    # obfuscated_html = replace_js_css(html_code, obfuscated_js, obfuscated_css)
+    # Replace the original CSS in the HTML code with the minified CSS code
+    obfuscated_html = replace_css(html_code, minified_css)
     
     # Minify HTML
-    minified_html = htmlmin(html_code)
+    minified_html = htmlmin(obfuscated_html)
     
     return minified_html
 
