@@ -516,50 +516,20 @@ def freebird():
 
 
 
-def extract_css(html_code):
-    soup = BeautifulSoup(html_code, 'html.parser')
-    style_tags = soup.find_all('style')
-    css_code = ''
-    for tag in style_tags:
-        css_code += tag.string if tag.string else ''
-    return css_code
-
-def replace_css(html_code, css_code):
-    soup = BeautifulSoup(html_code, 'html.parser')
-    style_tags = soup.find_all('style')
-    for tag in style_tags:
-        tag.string.replace_with(css_code)
-    return str(soup)
 
 @app.route('/obfuscate', methods=['POST'])
 def obfuscate_code():
-    try:
-        data = request.get_json()
-        url = data.get('url')
+    data = request.get_json()
+    url = data.get('url')
 
-        # Fetch the HTML code from the URL
-        response = requests.get(url)
-        html_code = response.text
+    # Fetch the HTML code from the URL
+    response = requests.get(url)
+    html_code = response.text
 
-        # Extract the CSS from the HTML code
-        css_code = extract_css(html_code)
+    # Obfuscate the HTML code
+    obfuscated_html = minify(html_code, remove_empty_space=True)
 
-        # Minify the CSS code
-        parser = cssutils.CSSParser()
-        css_stylesheet = parser.parseString(css_code)
-        cssutils.ser.prefs.useMinified()
-        minified_css = css_stylesheet.cssText.decode("utf-8")
-
-        # Replace the original CSS in the HTML code with the minified CSS code
-        obfuscated_html = replace_css(html_code, minified_css)
-    
-        # Minify HTML
-        minified_html = htmlmin(obfuscated_html)
-    
-        return minified_html
-    except Exception as e:
-        app.logger.error(f"Error occurred: {e}")
-        return str(e), 500
+    return obfuscated_html
 
 if __name__ == '__main__':
     app.run(debug=True)
