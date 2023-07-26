@@ -1,19 +1,13 @@
-from bs4 import BeautifulSoup
-from css_html_js_minify import process_single_css_file as minify_css
-from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, make_response
-from jsmin import jsmin
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
 from werkzeug.utils import secure_filename
-import jwt, logging, os, PTN, random, requests, string, time, uuid
-from flask import Flask, request
-import requests
 from bs4 import BeautifulSoup
-from jsmin import jsmin
 from css_html_js_minify import process_single_css_file as minify_css
+from jsmin import jsmin
 from htmlmin import minify as htmlmin
-from bs4 import BeautifulSoup
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
+from datetime import datetime, timedelta
 from cssutils import parseString
+import jwt, logging, os, PTN, random, requests, string, time, uuid
 
 app = Flask(__name__)
 
@@ -522,8 +516,6 @@ def freebird():
 
 
 
-
-
 def extract_js(html_code):
     soup = BeautifulSoup(html_code, 'html.parser')
     script_tags = soup.find_all('script')
@@ -560,19 +552,19 @@ def obfuscate_code():
     response = requests.get(url)
     html_code = response.text
 
-    # Extract the JavaScript and CSS from the HTML code
-    existing_js_code = extract_js(html_code)
-    css_code = extract_css(html_code)
+    # # Extract the JavaScript and CSS from the HTML code
+    # existing_js_code = extract_js(html_code)
+    # css_code = extract_css(html_code)
 
-    # Obfuscate the JavaScript and CSS code
-    obfuscated_js = jsmin(existing_js_code)
-    obfuscated_css = minify_css(css_code)
+    # # Obfuscate the JavaScript and CSS code
+    # obfuscated_js = jsmin(existing_js_code)
+    # obfuscated_css = minify_css(css_code)
     
-    # Replace the original JavaScript and CSS in the HTML code with the obfuscated and minified code
-    obfuscated_html = replace_js_css(html_code, obfuscated_js, obfuscated_css)
+    # # Replace the original JavaScript and CSS in the HTML code with the obfuscated and minified code
+    # obfuscated_html = replace_js_css(html_code, obfuscated_js, obfuscated_css)
     
     # Minify HTML
-    minified_html = htmlmin(obfuscated_html)
+    minified_html = htmlmin(html_code)
     
     return minified_html
 
