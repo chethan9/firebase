@@ -533,26 +533,30 @@ def replace_css(html_code, css_code):
 
 @app.route('/obfuscate', methods=['POST'])
 def obfuscate_code():
-    data = request.get_json()
-    url = data.get('url')
+    try:
+        data = request.get_json()
+        url = data.get('url')
 
-    # Fetch the HTML code from the URL
-    response = requests.get(url)
-    html_code = response.text
+        # Fetch the HTML code from the URL
+        response = requests.get(url)
+        html_code = response.text
 
-    # Extract the CSS from the HTML code
-    css_code = extract_css(html_code)
+        # Extract the CSS from the HTML code
+        css_code = extract_css(html_code)
 
-    # Minify the CSS code
-    minified_css = minify_css(css_code)
+        # Minify the CSS code
+        minified_css = minify_css(css_code)
     
-    # Replace the original CSS in the HTML code with the minified CSS code
-    obfuscated_html = replace_css(html_code, minified_css)
+        # Replace the original CSS in the HTML code with the minified CSS code
+        obfuscated_html = replace_css(html_code, minified_css)
     
-    # Minify HTML
-    minified_html = htmlmin(obfuscated_html)
+        # Minify HTML
+        minified_html = htmlmin(obfuscated_html)
     
-    return minified_html
+        return minified_html
+    except Exception as e:
+        app.logger.error(f"Error occurred: {e}")
+        return str(e), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
