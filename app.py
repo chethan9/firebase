@@ -11,6 +11,9 @@ import jwt, logging, os, PTN, random, requests, string, time, uuid
 import cssutils
 from flask import Flask, request, jsonify
 from instagrapi import Client
+from flask import Flask, request, session
+from instagrapi import Client, ChallengeChoice
+
 
 
 app = Flask(__name__)
@@ -585,3 +588,27 @@ def instadownload():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # replace with your actual secret key
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json['username']
+    password = request.json['password']
+    code = request.json.get('code')
+
+    client = Client()
+
+    try:
+        client.login(username, password)
+    except ChallengeRequired:
+        if code is None:
+            # Store the client object in the session so we can use it in the next request
+            session['client'] = client
+            return {'status': 'challenge_required'}, 401
+        else:
+            client.challenge_resolve(code)
+            return {'status': 'logged_in'}
+
+    return {'status': 'logged_in'}
