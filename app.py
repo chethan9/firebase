@@ -562,7 +562,7 @@ def instadownload():
     # Initialize the Instagram client
     # Replace 'username' and 'password' with your Instagram credentials
     client = Client()
-    client.login('username', 'password')
+    client.login('chethan9@Hotmail.com', 'JtJPE9^d28DcI^7P')
 
     # Get the media ID from the URL
     media_id = client.media_id_from_url(instagram_url)
