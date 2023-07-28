@@ -1,18 +1,23 @@
-from flask import Flask, request, jsonify, make_response
+from datetime import datetime, timedelta
+from flask import Flask, request, jsonify, session
+from instagrapi import Client
+from jsmin import jsmin
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
 from werkzeug.utils import secure_filename
 from bs4 import BeautifulSoup
 from css_html_js_minify import process_single_css_file as minify_css
-from jsmin import jsmin
-from htmlmin import minify as htmlmin
-from urllib.parse import urlparse, parse_qs, urlencode, urlunparse, quote
-from datetime import datetime, timedelta
 from cssutils import parseString
-import jwt, logging, os, PTN, random, requests, string, time, uuid
 import cssutils
-from flask import Flask, request, jsonify
-from instagrapi import Client
-from flask import Flask, request, session
-from instagrapi import Client, ChallengeChoice
+import jwt
+import logging
+import os
+import PTN
+import random
+import requests
+import string
+import time
+import uuid
+from htmlmin import minify as htmlmin
 
 
 
@@ -590,25 +595,44 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # replace with your actual secret key
+app.secret_key = 'your-secret-key'  # replace with your own secret key
+
+def challenge_handler(api, challenge_url):
+    try:
+        choice = api.challenge_select_verify_method(challenge_url, choice=0)  # sms
+    except Exception as e:
+        print(f"Exception: {e}")
+        choice = api.challenge_select_verify_method(challenge_url, choice=1)  # email
+    session['client'] = api
+    session['challenge_url'] = challenge_url
+    return jsonify({'message': 'Challenge required', 'choice': choice}), 200
 
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.json['username']
-    password = request.json['password']
-    code = request.json.get('code')
+    username = request.json.get('username')
+    password = request.json.get('password')
 
     client = Client()
+    client.on_challenge = challenge_handler
 
-    try:
-        client.login(username, password)
-    except ChallengeRequired:
-        if code is None:
-            # Store the client object in the session so we can use it in the next request
-            session['client'] = client
-            return {'status': 'challenge_required'}, 401
+    if client.login(username, password):
+        return jsonify({'message': 'Logged in successfully'}), 200
+    else:
+        return jsonify({'message': 'Failed to log in'}), 401
+
+@app.route('/challenge', methods=['POST'])
+def challenge():
+    code = request.json.get('code')
+    client = session.get('client')
+    challenge_url = session.get('challenge_url')
+
+    if client and challenge_url:
+        if client.challenge_send_security_code(challenge_url, code):
+            return jsonify({'message': 'Challenge resolved successfully'}), 200
         else:
-            client.challenge_resolve(code)
-            return {'status': 'logged_in'}
+            return jsonify({'message': 'Failed to resolve challenge'}), 400
+    else:
+        return jsonify({'message': 'No challenge in progress'}), 400
 
-    return {'status': 'logged_in'}
+if __name__ == '__main__':
+    app.run(debug=True)
