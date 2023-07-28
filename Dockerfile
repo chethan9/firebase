@@ -25,7 +25,7 @@ RUN apt-get update && \
 ADD . /app
 
 # Install necessary packages, Flask, BeautifulSoup, requests, ffmpeg-python, gunicorn, parse-torrent-title, pyjwt, selenium, cinemagoer, jsmin, css_html_js_minify
-RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn parse-torrent-title pyjwt selenium cinemagoer jsmin css_html_js_minify cssutils htmlmin
+RUN pip install --no-cache-dir flask werkzeug beautifulsoup4 requests ffmpeg-python gunicorn parse-torrent-title pyjwt selenium cinemagoer jsmin css_html_js_minify cssutils htmlmin instagrapi
 
 # Run app.py (Flask server) when the container launches
 CMD gunicorn --bind 0.0.0.0:$PORT app:app
