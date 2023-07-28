@@ -9,6 +9,9 @@ from datetime import datetime, timedelta
 from cssutils import parseString
 import jwt, logging, os, PTN, random, requests, string, time, uuid
 import cssutils
+from flask import Flask, request, jsonify
+from instagrapi import Client
+
 
 app = Flask(__name__)
 
@@ -545,6 +548,40 @@ def obfuscate_code():
     obfuscated_css = obfuscate_css(css_code)
 
     return obfuscated_css
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
+@app.route('/instadownload', methods=['POST'])
+def instadownload():
+    # Get the Instagram URL from the request data
+    data = request.get_json()
+    instagram_url = data.get('url')
+
+    # Initialize the Instagram client
+    # Replace 'username' and 'password' with your Instagram credentials
+    client = Client()
+    client.login('username', 'password')
+
+    # Get the media ID from the URL
+    media_id = client.media_id_from_url(instagram_url)
+
+    # Get the media object
+    media = client.media_info(media_id)
+
+    # Check the type of the media and download accordingly
+    if media.media_type == 1:  # Photo
+        photo_url = media.image_url
+        return jsonify({'type': 'photo', 'url': photo_url})
+    elif media.media_type == 2:  # Video
+        video_url = media.video_url
+        return jsonify({'type': 'video', 'url': video_url})
+    elif media.media_type == 8:  # Album
+        album_urls = [item.image_url for item in media.carousel_media]
+        return jsonify({'type': 'album', 'urls': album_urls})
+
+    return jsonify({'error': 'Unknown media type'})
 
 if __name__ == '__main__':
     app.run(debug=True)
