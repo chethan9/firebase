@@ -560,7 +560,6 @@ def obfuscate_code():
 if __name__ == '__main__':
     app.run(debug=True)
 
-
 @app.route('/instadownload', methods=['POST'])
 def instadownload():
     # Get the Instagram URL from the request data
@@ -573,7 +572,7 @@ def instadownload():
     client.login('chethan9@Hotmail.com', 'JtJPE9^d28DcI^7P')
 
     # Get the media ID from the URL
-    media_id = client.media_id_from_url(instagram_url)
+    media_id = client.extract_media_id(instagram_url)  # Use extract_media_id instead of media_id_from_url
 
     # Get the media object
     media = client.media_info(media_id)
@@ -595,7 +594,8 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-app.secret_key = 'your-secret-key'  # replace with your own secret key
+
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # replace with your own secret key
 
 def challenge_handler(api, challenge_url):
     try:
