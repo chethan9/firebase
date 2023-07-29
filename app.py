@@ -18,7 +18,7 @@ import string
 import time
 import uuid
 from htmlmin import minify as htmlmin
-
+import re
 
 
 app = Flask(__name__)
@@ -560,42 +560,12 @@ def obfuscate_code():
 if __name__ == '__main__':
     app.run(debug=True)
 
-@app.route('/instadownload', methods=['POST'])
-def instadownload():
-    # Get the Instagram URL from the request data
-    data = request.get_json()
-    instagram_url = data.get('url')
-
-    # Initialize the Instagram client
-    # Replace 'username' and 'password' with your Instagram credentials
-    client = Client()
-    client.login('chethan9@Hotmail.com', 'JtJPE9^d28DcI^7P')
-
-    # Get the media ID from the URL
-    media_id = client.extract_media_id(instagram_url)  # Use extract_media_id instead of media_id_from_url
-
-    # Get the media object
-    media = client.media_info(media_id)
-
-    # Check the type of the media and download accordingly
-    if media.media_type == 1:  # Photo
-        photo_url = media.image_url
-        return jsonify({'type': 'photo', 'url': photo_url})
-    elif media.media_type == 2:  # Video
-        video_url = media.video_url
-        return jsonify({'type': 'video', 'url': video_url})
-    elif media.media_type == 8:  # Album
-        album_urls = [item.image_url for item in media.carousel_media]
-        return jsonify({'type': 'album', 'urls': album_urls})
-
-    return jsonify({'error': 'Unknown media type'})
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
 
 
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # replace with your own secret key
+
+def extract_shortcode(url):
+    return re.findall(r"\/p\/(.*?)\/", url)[0]
 
 def challenge_handler(api, challenge_url):
     try:
@@ -633,6 +603,34 @@ def challenge():
             return jsonify({'message': 'Failed to resolve challenge'}), 400
     else:
         return jsonify({'message': 'No challenge in progress'}), 400
+
+@app.route('/instadownload', methods=['POST'])
+def instadownload():
+    # Get the Instagram URL from the request data
+    data = request.get_json()
+    instagram_url = data.get('url')
+
+    # Initialize the Instagram client
+    client = session.get('client')
+
+    # Get the media shortcode from the URL
+    shortcode = extract_shortcode(instagram_url)
+
+    # Get the media object
+    media = client.media_info(shortcode)
+
+    # Check the type of the media and download accordingly
+    if media.media_type == 1:  # Photo
+        photo_url = media.image_url
+        return jsonify({'type': 'photo', 'url': photo_url})
+    elif media.media_type == 2:  # Video
+        video_url = media.video_url
+        return jsonify({'type': 'video', 'url': video_url})
+    elif media.media_type == 8:  # Album
+        album_urls = [item.image_url for item in media.carousel_media]
+        return jsonify({'type': 'album', 'urls': album_urls})
+
+    return jsonify({'error': 'Unknown media type'})
 
 if __name__ == '__main__':
     app.run(debug=True)
