@@ -527,42 +527,7 @@ def freebird():
 
 
 
-
-def extract_css(html_code):
-    soup = BeautifulSoup(html_code, 'html.parser')
-    style_tags = soup.find_all('style')
-    css_code = ''
-    for tag in style_tags:
-        css_code += tag.string if tag.string else ''
-    return css_code
-
-def obfuscate_css(css_code):
-    style = parseString(css_code)
-    return style.cssText
-
-@app.route('/obfuscate', methods=['POST'])
-def obfuscate_code():
-    data = request.get_json()
-    url = data.get('url')
-
-    # Fetch the HTML code from the URL
-    response = requests.get(url)
-    html_code = response.text
-
-    # Extract the CSS from the HTML code
-    css_code = extract_css(html_code)
-
-    # Obfuscate the CSS code
-    obfuscated_css = obfuscate_css(css_code)
-
-    return obfuscated_css
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-
-
-app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # replace with your own secret key
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 def extract_shortcode(url):
     match = re.search(r"\/p\/(.*?)\/|\/reel\/(.*?)\/", url)
@@ -573,10 +538,9 @@ def extract_shortcode(url):
 
 def challenge_handler(api, challenge_url):
     try:
-        choice = api.challenge_select_verify_method(challenge_url, choice=0)  # sms
+        choice = api.challenge_select_verify_method(challenge_url, choice=0)
     except Exception as e:
-        print(f"Exception: {e}")
-        choice = api.challenge_select_verify_method(challenge_url, choice=1)  # email
+        choice = api.challenge_select_verify_method(challenge_url, choice=1)
     session['client'] = api
     session['challenge_url'] = challenge_url
     return jsonify({'message': 'Challenge required', 'choice': choice}), 200
@@ -585,11 +549,11 @@ def challenge_handler(api, challenge_url):
 def login():
     username = request.json.get('username')
     password = request.json.get('password')
-
     client = Client()
     client.on_challenge = challenge_handler
-
     if client.login(username, password):
+        session['username'] = username
+        session['password'] = password
         return jsonify({'message': 'Logged in successfully'}), 200
     else:
         return jsonify({'message': 'Failed to log in'}), 401
@@ -599,7 +563,6 @@ def challenge():
     code = request.json.get('code')
     client = session.get('client')
     challenge_url = session.get('challenge_url')
-
     if client and challenge_url:
         if client.challenge_send_security_code(challenge_url, code):
             return jsonify({'message': 'Challenge resolved successfully'}), 200
@@ -610,32 +573,27 @@ def challenge():
 
 @app.route('/instadownload', methods=['POST'])
 def instadownload():
-    # Get the Instagram URL from the request data
     data = request.get_json()
     instagram_url = data.get('url')
-
-    # Extract the shortcode from the URL
     shortcode = extract_shortcode(instagram_url)
-
-    # Get the client from the session
-    client = session.get('client')
-
-    if client:
-        # Get the media object
+    username = session.get('username')
+    password = session.get('password')
+    if username and password:
+        client = Client()
+        client.login(username, password)
         media = client.media_info(shortcode)
-
-        # Check the type of the media and download accordingly
-        if media.media_type == 1:  # Photo
+        if media.media_type == 1:
             photo_url = media.image_url
             return jsonify({'type': 'photo', 'url': photo_url})
-        elif media.media_type == 2:  # Video
+        elif media.media_type == 2:
             video_url = media.video_url
             return jsonify({'type': 'video', 'url': video_url})
-        elif media.media_type == 8:  # Album
+        elif media.media_type == 8:
             album_urls = [item.image_url for item in media.carousel_media]
             return jsonify({'type': 'album', 'urls': album_urls})
-
         return jsonify({'error': 'Unknown media type'})
     else:
         return jsonify({'error': 'Not logged in'}), 401
 
+if __name__ == '__main__':
+    app.run(debug=True)
