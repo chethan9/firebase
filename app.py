@@ -615,9 +615,10 @@ def instadownload():
     instagram_url = data.get('url')
 
     # Initialize the Instagram client
-    client = session.get('client')
+    client = Client()
+    client.login('chethan9@Hotmail.com', 'JtJPE9^d28DcI^7P')
 
-    # Get the media shortcode from the URL
+    # Extract the shortcode from the URL
     shortcode = extract_shortcode(instagram_url)
 
     # Get the media object
@@ -635,6 +636,3 @@ def instadownload():
         return jsonify({'type': 'album', 'urls': album_urls})
 
     return jsonify({'error': 'Unknown media type'})
-
-if __name__ == '__main__':
-    app.run(debug=True)
