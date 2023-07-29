@@ -614,25 +614,28 @@ def instadownload():
     data = request.get_json()
     instagram_url = data.get('url')
 
-    # Initialize the Instagram client
-    client = Client()
-    client.login('chethan9@Hotmail.com', 'JtJPE9^d28DcI^7P')
-
     # Extract the shortcode from the URL
     shortcode = extract_shortcode(instagram_url)
 
-    # Get the media object
-    media = client.media_info(shortcode)
+    # Get the client from the session
+    client = session.get('client')
 
-    # Check the type of the media and download accordingly
-    if media.media_type == 1:  # Photo
-        photo_url = media.image_url
-        return jsonify({'type': 'photo', 'url': photo_url})
-    elif media.media_type == 2:  # Video
-        video_url = media.video_url
-        return jsonify({'type': 'video', 'url': video_url})
-    elif media.media_type == 8:  # Album
-        album_urls = [item.image_url for item in media.carousel_media]
-        return jsonify({'type': 'album', 'urls': album_urls})
+    if client:
+        # Get the media object
+        media = client.media_info(shortcode)
 
-    return jsonify({'error': 'Unknown media type'})
+        # Check the type of the media and download accordingly
+        if media.media_type == 1:  # Photo
+            photo_url = media.image_url
+            return jsonify({'type': 'photo', 'url': photo_url})
+        elif media.media_type == 2:  # Video
+            video_url = media.video_url
+            return jsonify({'type': 'video', 'url': video_url})
+        elif media.media_type == 8:  # Album
+            album_urls = [item.image_url for item in media.carousel_media]
+            return jsonify({'type': 'album', 'urls': album_urls})
+
+        return jsonify({'error': 'Unknown media type'})
+    else:
+        return jsonify({'error': 'Not logged in'}), 401
+
