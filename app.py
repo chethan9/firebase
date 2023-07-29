@@ -565,7 +565,11 @@ if __name__ == '__main__':
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'  # replace with your own secret key
 
 def extract_shortcode(url):
-    return re.findall(r"\/p\/(.*?)\/", url)[0]
+    match = re.search(r"\/p\/(.*?)\/|\/reel\/(.*?)\/", url)
+    if match:
+        return match.group(1) or match.group(2)
+    else:
+        raise ValueError("Invalid Instagram URL")
 
 def challenge_handler(api, challenge_url):
     try:
