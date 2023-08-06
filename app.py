@@ -19,6 +19,7 @@ import time
 import uuid
 from htmlmin import minify as htmlmin
 import re
+from flask import make_response
 
 
 app = Flask(__name__)
